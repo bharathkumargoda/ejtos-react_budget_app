@@ -31,18 +31,31 @@ export const AppReducer = (state, action) => {
                 }
             }
             case 'RED_EXPENSE':
-                const red_expenses = state.expenses.map((currentExp)=> {
-                    if (currentExp.name === action.payload.name && currentExp.cost - action.payload.cost >= 0) {
-                        currentExp.cost =  currentExp.cost - action.payload.cost;
+                let flag=false;
+            const red_expenses = state.expenses.map((currentExp)=> {
+                if (currentExp.name === action.payload.name ) {
+                    if(currentExp.cost-action.payload.cost>=0)
+                    {currentExp.cost =  currentExp.cost - action.payload.cost;
                         budget = state.budget + action.payload.cost
+                        flag=true;
+                    } 
+                }
+                return currentExp;
+            })
+            action.type = "DONE";
+                if(flag===true)
+                {
+                    return {
+                        ...state,
+                        expenses: [...red_expenses],
+                    };
+                }
+                else {
+                    alert("Cannot decrease the allocation Further");
+                    return {
+                        ...state
                     }
-                    return currentExp
-                })
-                action.type = "DONE";
-                return {
-                    ...state,
-                    expenses: [...red_expenses],
-                };
+                }
             case 'DELETE_EXPENSE':
             action.type = "DONE";
             state.expenses.map((currentExp)=> {
@@ -59,12 +72,32 @@ export const AppReducer = (state, action) => {
             };
         case 'SET_BUDGET':
             action.type = "DONE";
-            state.budget = action.payload;
+            if(action.payload<=2000000)
+            {
+                let total_spent = 0;
+            total_spent = state.expenses.reduce(
+                (previousExp, currentExp) => {
+                    return previousExp + currentExp.cost
+                },0)
 
-            return {
-                ...state,
-            };
-        case 'CHG_CURRENCY':
+              if(action.payload>=total_spent){
+                state.budget = action.payload;
+                return {
+                    ...state
+                }}
+              else{
+                  alert("You cannot reduce the budget value lower than the spending");
+                  return {...state};
+              }   
+            }
+            else 
+            {
+                alert("Cannot exceed limit");
+                return {
+                    ...state
+                }
+            }
+        case 'CHNG_CURRENCY':
             action.type = "DONE";
             state.currency = action.payload;
             return {
